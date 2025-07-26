@@ -22,7 +22,7 @@
 
 ## 🧪 How to Run Locally
 
-git clone https://github.com/yourusername/SecureDocAI.git
+git clone https://github.com/abdullahfayyaz/Secure-Document-Management-System.git
 cd ISProject
 pip install -r requirements.txt
 python manage.py migrate
