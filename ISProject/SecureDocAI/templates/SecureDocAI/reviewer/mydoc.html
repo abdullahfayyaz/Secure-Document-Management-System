@@ -1,0 +1,74 @@
+{% extends "SecureDocAI/reviewer/layout.html" %}
+{% load static %}  <!-- Make sure this is at the top -->
+
+{% block title %}SecureDocAI - My Doc{% endblock %}
+
+{% block content %}
+
+<style>
+    p.no-documents {
+    padding: 1rem;
+    margin-top: 2rem;
+    background-color: #fef3c7; /* light yellow */
+    color: #92400e;             /* dark amber text */
+    border: 1px solid #fde68a;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+a {
+    text-decoration: none;
+}
+</style>
+<nav class="main-nav">
+    <div class="container">
+        <div class="nav-links">
+            <a href="{% url 'reviewer_dashboard' %}" class="nav-link">All Documents</a>
+            <a href="{% url 'reviewer_dashboard_myDoc' %}" class="nav-link active">My Documents</a>
+            <a href="{% url 'reviewer_dashboard_Request' %}" class="nav-link">Request Status</a>
+            <a href="{% url 'reviewer_accesslog' %}" class="nav-link">Access log</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container">
+    <section class="page active">
+
+        <h1>My Documents</h1>
+<div class="documents-grid">
+    {% for doc in documents %}
+    <div class="document-card">
+        <div class="document-header">
+            <div class="document-info">
+                <div class="document-title">
+                    <i data-lucide="file-text"></i>
+                    <span>{{ doc.title }}</span>
+                </div>
+                <p class="document-description">{{ doc.description }}</p>
+                <div class="document-metadata">
+                    <div class="metadata-item">
+                        <i data-lucide="user"></i>
+                        <span>{{ doc.uploader.username }}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <i data-lucide="clock"></i>
+                        <span>{{ doc.uploaded_at|date:"Y-m-d" }}</span>
+                    </div>
+                </div>
+            </div>
+            <a class="btn" href="{% url 'reviewer_download' doc.id %}" download>Download</a>
+        </div>
+    </div>
+    {% empty %}
+    <p class="no-documents">No accepted documents found.</p>
+    {% endfor %}
+    </div>
+
+    
+    
+    </section>
+</main>
+<script>lucide.createIcons();</script>
+{% endblock %}

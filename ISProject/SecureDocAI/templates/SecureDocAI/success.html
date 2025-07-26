@@ -1,0 +1,28 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Success</title>
+    <link rel="stylesheet" href="{% static 'styles/success.css' %}"> 
+    <style>
+        a {
+    text-decoration: none;
+}
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-card">
+            <div class="success-icon">✓</div>
+            <h1>Login Successful!</h1>
+            <p>You have been successfully authenticated.</p>
+            <div class="button-group">
+                <a href="{% url 'dashboard' %}" class="btn secondary">Go to Dashboard</a>
+                <a href="{% url 'logout' %}" class="btn secondary">Sign Out</a>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

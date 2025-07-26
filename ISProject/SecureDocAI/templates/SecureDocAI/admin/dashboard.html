@@ -1,0 +1,93 @@
+{% extends "SecureDocAI/admin/layout.html" %}
+{% load static %}  <!-- Make sure this is at the top -->
+
+{% block title %}Dashboard - SecureDocAI{% endblock %}
+
+{% block content %}
+<style>
+    
+a {
+    text-decoration: none;
+}
+p.no-documents {
+    padding: 1rem;
+    margin-top: 2rem;
+    background-color: #fef3c7; /* light yellow */
+    color: #92400e;             /* dark amber text */
+    border: 1px solid #fde68a;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+</style>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h1>SecureDocAI</h1>
+        <p>Admin Dashboard</p>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'admin_dashboard' %}" class="nav-item active" data-tab="dashboard">
+            <i data-lucide="bar-chart-3"></i>
+            Dashboard
+        </a>
+        <a href="{% url 'admin_Requests' %}" class="nav-item" data-tab="requests">
+            <i data-lucide="clock"></i>
+            Document Requests
+        </a>
+        <a href="{% url 'admin_Doc' %}" class="nav-item" data-tab="documents">
+            <i data-lucide="file-text"></i>
+            All Documents
+        </a>
+        <a href="{%  url 'admin_users' %}" class="nav-item" data-tab="users">
+            <i data-lucide="users"></i>
+            User Management
+        </a>
+        <a href="{% url 'admin_accesslog' %}" class="nav-item" data-tab="settings">
+            <i data-lucide="history"></i>
+            Access log
+        </a>
+        <a href="{% url 'admin_risk' %}" class="nav-item" data-tab="settings">
+            <i data-lucide="alert-triangle	"></i>
+            Risk Check
+        </a>
+    </nav>
+    <a href="{% url 'logout' %}" class="logout-btn">
+        <i data-lucide="log-out"></i>
+        Logout
+    </a>
+</div>
+
+<main class="main-content">
+    <section>
+        <h2>Overview</h2>
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-icon"><i data-lucide="users"></i></div>
+                <h3>Total Uploaders</h3>
+                <p class="stat-value">{{ total_uploaders }}</p>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon"><i data-lucide="users"></i></div>
+                <h3>Total Reviewers</h3>
+                <p class="stat-value">{{ total_reviewers }}</p>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-icon"><i data-lucide="file-text"></i></div>
+                <h3>Total Documents</h3>
+                <p class="stat-value">{{ total_documents }}</p>
+            </div>
+            <div class="stat-card yellow">
+                <div class="stat-icon"><i data-lucide="clock"></i></div>
+                <h3>Pending Requests</h3>
+                <p class="stat-value">{{ pending_requests }}</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+<script>lucide.createIcons();</script>
+
+{% endblock %}

@@ -1,0 +1,55 @@
+
+{% extends "SecureDocAI/layout.html" %}
+{% load static %}  <!-- Make sure this is at the top -->
+
+{% block title %}SecureDocAI - MFA Verification{% endblock %}
+
+{% block content %}
+<script>
+    // Show loader on initial page load
+    toggleLoader(true);
+
+    // After a delay, hide loader and show form
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(() => {
+            toggleLoader(false);
+            document.getElementById('mfaForm').style.display = 'block';
+        }, 2000); // 2000 ms = 2 seconds delay
+    });
+</script>
+<div class="container">
+    <div class="form-container" id="mfaForm">
+        <h1>SecureDocAI</h1>
+        <h2>Enter MFA Code</h2>
+        <p>Please enter the 6-digit code sent to your email</p>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" name="otp" id="otpCode" required placeholder="Enter 6-digit code" maxlength="6" pattern="\d{6}">
+            </div>
+            <button type="submit" class="btn">Verify</button>
+        </form>
+        
+    </div>
+</div>
+
+<div class="loader hidden" id="loader">
+    <div class="spinner"></div>
+</div>
+
+
+<script>
+    function toggleLoader(show) {
+    document.getElementById('loader').classList.toggle('hidden', !show);
+}
+
+// Add input validation for OTP input
+if (document.getElementById('otpCode')) {
+    document.getElementById('otpCode').addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '').slice(0, 6);
+    });
+}
+</script>
+{% endblock %}
+
+

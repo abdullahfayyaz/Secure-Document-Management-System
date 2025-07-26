@@ -1,0 +1,9 @@
+from django.contrib import admin
+from .models import *
+# Register your models here.
+admin.site.register(User)
+admin.site.register(Document)
+admin.site.register(ClassificationResult)
+admin.site.register(ReviewRequest)
+admin.site.register(SharedKey)
+admin.site.register(AccessLog)

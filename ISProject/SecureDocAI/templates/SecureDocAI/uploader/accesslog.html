@@ -1,0 +1,243 @@
+{% extends "SecureDocAI/uploader/layout.html" %}
+{% load static %}  <!-- Make sure this is at the top -->
+
+{% block title %}SecureDocAI - UploadDocument{% endblock %}
+
+{% block content %}
+
+<style>
+    .btn-link {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 10px;
+    color: white;
+    background-color: #6277b8;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-link:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+.btn-link:active {
+    transform: scale(0.98);
+}
+
+.btn-link.disabled {
+    pointer-events: none;
+    background-color: #aaa;
+    cursor: default;
+}
+
+
+a {
+    text-decoration: none;
+}
+
+/* Navigation styles */
+.main-nav {
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: center;
+}
+
+.nav-link {
+    padding: 1rem 1.5rem;
+    color: #4b5563;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+}
+
+.nav-link.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+}
+
+
+.card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+.search-box input {
+    padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    width: 300px;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.filter-btn:hover {
+    background-color: #f9fafb;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 1rem 0.75rem;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+td {
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+
+
+
+/* Tab Content */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+</style>
+
+<nav class="main-nav">
+    <div class="container">
+        <div class="nav-links">
+            <a href="{% url 'uploader_dashboard' %}" class="nav-link">Upload Documents</a>
+            <a href="{% url 'uploaderViewDocument' %}" class="nav-link active">View Documents</a>
+            <a href="{% url 'uploaderAccesslog' %}" class="nav-link">Access log</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container">
+
+
+    <section class="upload-section">
+        <h2><i data-lucide="history"></i> Access log</h2>
+        
+
+        <div class="card">
+            <div class="table-header">
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" placeholder="Search logs..." />
+                </div>
+                <button class="filter-btn">
+                    <i data-lucide="filter"></i> Filter
+                </button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Action</th>
+                        <th>Timestamp</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody id="riskLogTable">
+                    {% for log in access_logs %}
+                    <tr>
+                        <td>{% if log.document %}{{ log.document.title }}{% else %}N/A{% endif %}</td>
+                        <td>{{ log.get_action_display }}</td>
+                        <td>{{ log.timestamp|date:"Y-m-d H:i" }}</td>
+                        <td>{{ log.ip_address|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">No access logs found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        
+    </section>
+</main>
+
+<script>lucide.createIcons();</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchInput");
+        const tableRows = document.querySelectorAll("#riskLogTable tr");
+
+        searchInput.addEventListener("keyup", function () {
+            const filter = searchInput.value.toLowerCase();
+
+            tableRows.forEach(function (row) {
+                const rowText = row.textContent.toLowerCase();
+                if (rowText.includes(filter)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Optionally show "no results" message
+            const anyVisible = Array.from(tableRows).some(row => row.style.display !== "none");
+            const noLogsRow = document.querySelector(".table-no-logs");
+            if (noLogsRow) {
+                noLogsRow.style.display = anyVisible ? "none" : "";
+            }
+        });
+    });
+</script>
+{% endblock %}

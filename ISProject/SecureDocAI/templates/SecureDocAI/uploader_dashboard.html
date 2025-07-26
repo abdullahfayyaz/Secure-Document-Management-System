@@ -1,0 +1,328 @@
+{% load static %}  <!-- Make sure this is at the top -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureDocAI Document Management Interface</title>
+    <link rel="stylesheet" href="{% static 'styles/uploader.css' %}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+
+a {
+    text-decoration: none;
+}
+
+.toast {
+  min-width: 250px;
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  animation: slideIn 0.4s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.toast.success {
+  background-color: #38a169; /* green */
+}
+
+.toast.error {
+  background-color: #e53e3e; /* red */
+}
+
+.toast.warning {
+  background-color: #dd6b20; /* orange */
+}
+
+.toast.info {
+  background-color: #3182ce; /* blue */
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+    </style>
+
+
+
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <div class="brand">
+                <i data-lucide="file-text" class="brand-icon"></i>
+                <h1>SecureDocAI</h1>
+            </div>
+            <div class="user-section">
+                <div class="user-info">
+                    <i data-lucide="user"></i>
+                    <span>{{ user }}</span>
+                </div>
+                <a href="{% url 'logout' %}" class="logout-btn">
+                    <i data-lucide="log-out"></i>
+                    <span>Logout</span>
+                </a>                
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Upload Form -->
+        <section class="upload-section">
+            <h2><i data-lucide="upload"></i> Upload Document</h2>
+
+
+            <form id="uploadForm" class="upload-form" method="POST" enctype="multipart/form-data">
+
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="title">Document Title</label>
+                    <input type="text" id="title" name='title' required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="3" name='description' required ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload File</label>
+                    <div class="file-upload">
+                        <i data-lucide="upload" class="upload-icon"></i>
+                        <span id="fileName">Click to upload or drag and drop</span>
+                        <input type="file" id="fileInput" name="file" required>
+                    </div>
+                </div>
+                <!-- Add a hidden field for encrypted AES key -->
+                <input type="hidden" id="encryptedAESKey" name="encrypted_aes_key">
+                <input type="hidden" id="encryptedMetadata" name="encrypted_metadata">
+                <input type="hidden" id="classification" name="classification">
+                <input type="hidden" id="rsaPublicKey" value="{{ key }}">
+                <input type="hidden" id="signature" name="signature">
+                <input type="hidden" id="signingPublicKey" name="signingPublicKey"> <!-- FIXED -->                
+
+
+                <button type="submit" class="submit-btn">Upload Document</button>
+            </form>
+        </section>
+
+        <!-- Documents List -->
+        <!-- Documents List -->
+        <section class="documents-section">
+            <h2><i data-lucide="eye"></i> Your Documents</h2>
+            <div id="documentsList" class="documents-list">
+                {% for doc in documents %}
+                <div class="document-item">
+                    <div class="document-header">
+                        <div class="document-info">
+                            <i data-lucide="file-text" style="color: #2563eb;"></i>
+                            <div>
+                                <h3 class="font-medium">{{ doc.title }}</h3>
+                                <p class="text-sm text-gray-500">{{ doc.encrypted_file.name|cut:"encrypted/" }}</p>
+                            </div>
+                        </div>
+                        <div class="document-type">
+                            {% if doc.classification == "confidential" %}
+                                <i data-lucide="shield" class="type-icon" style="color: #dc2626;"></i>
+                            {% elif doc.classification == "private" %}
+                                <i data-lucide="lock" class="type-icon" style="color: #ca8a04;"></i>
+                            {% elif doc.classification == "restricted" %}
+                                <i data-lucide="alert-circle" class="type-icon" style="color: #ea580c;"></i>
+                            {% else %}
+                                <i data-lucide="file-lock" class="type-icon" style="color: #6b7280;"></i>
+                            {% endif %}
+                            <span class="capitalize">{{ doc.classification }}</span>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-gray-600">{{ doc.description }}</p>
+                    <div class="mt-2 text-sm text-gray-500">Uploaded on {{ doc.uploaded_at|date:"Y-m-d" }}</div>
+                    <div class="document-actions mt-3">
+                        <a href="{% url 'view_document1' doc.id %}" class="view-btn">
+                            <i data-lucide="eye"></i>
+                        </a>
+                        <a href="{% url 'delete_document' doc.id %}" class="delete-btn" onclick="return confirm('Are you sure you want to delete this document?');">
+                            <i data-lucide="trash-2"></i>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No documents uploaded yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+        
+
+    </main>
+
+
+
+
+    <div class="toast-container">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="toast {{ message.tags }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <script src="{% static 'js/uploader.js' %}"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  
+  
+<!-- Load required libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/node-forge@1.3.1/dist/forge.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+
+<!-- Configure PDF.js worker -->
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+</script>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+
+    if (!file || file.type !== 'application/pdf') {
+        alert('Please select a valid PDF file.');
+        return;
+    }
+
+    const title = document.getElementById('title').value;
+    const rsaPublicKey = document.getElementById('rsaPublicKey').value;
+
+    // Step 1: Extract text from PDF
+    const extractedText = await extractTextFromPDF(file);
+
+    // Step 2: Classify content
+    const classification = mockAIClassification(extractedText);
+    document.getElementById('classification').value = classification;
+
+    // Step 3: Generate AES key
+    const aesKey = window.crypto.getRandomValues(new Uint8Array(32));
+
+    // Step 4: Encrypt PDF content with AES
+    const fileBuffer = await file.arrayBuffer();
+    const encryptedFileBuffer = await aesEncrypt(fileBuffer, aesKey);
+
+    const encryptedBlob = new Blob([encryptedFileBuffer], { type: 'application/octet-stream' });
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(new File([encryptedBlob], file.name));
+    fileInput.files = dataTransfer.files;
+
+    // Step 5: Encrypt AES key using RSA public key
+    const encryptedAESKey = encryptWithRSA(rsaPublicKey, aesKey);
+    document.getElementById('encryptedAESKey').value = btoa(encryptedAESKey);
+
+    // Step 6: Encrypt metadata
+    const metadata = JSON.stringify({ name: file.name, type: file.type });
+    const metadataBytes = new TextEncoder().encode(metadata);
+    const encryptedMetadataBuffer = await aesEncrypt(metadataBytes, aesKey);
+    document.getElementById('encryptedMetadata').value = btoa(String.fromCharCode(...new Uint8Array(encryptedMetadataBuffer)));
+
+    // Step 7: RSA Signing
+    const keyPair = await generateRSAKeyPair();
+    const messageToSign =  title;
+    const signatureBuffer = await signData(keyPair.privateKey, messageToSign);
+    const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+    document.getElementById('signature').value = signatureB64;
+
+    const publicKeyB64 = await exportPublicKey(keyPair.publicKey);
+    document.getElementById('signingPublicKey').value = publicKeyB64;
+
+    // Submit the form now that everything is processed
+    this.submit();
+});
+
+// ---------------------- Helper Functions ----------------------
+
+async function extractTextFromPDF(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let text = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map(item => item.str).join(' ') + '\n';
+    }
+    return text;
+}
+
+function mockAIClassification(text) {
+    if (text.toLowerCase().includes("invoice")) return "Finance";
+    if (text.toLowerCase().includes("project")) return "Engineering";
+    return "General";
+}
+
+async function aesEncrypt(data, key) {
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const cryptoKey = await window.crypto.subtle.importKey("raw", key, "AES-GCM", false, ["encrypt"]);
+    const encrypted = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv }, cryptoKey, data);
+    const combined = new Uint8Array(iv.length + encrypted.byteLength);
+    combined.set(iv);
+    combined.set(new Uint8Array(encrypted), iv.length);
+    return combined;
+}
+
+function encryptWithRSA(publicKeyPem, aesKey) {
+    const forge = window.forge;
+    const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
+    const encrypted = publicKey.encrypt(forge.util.binary.raw.encode(aesKey), 'RSA-OAEP');
+    return encrypted;
+}
+
+// --- RSA instead of DSA ---
+async function generateRSAKeyPair() {
+    return await window.crypto.subtle.generateKey(
+        {
+            name: "RSASSA-PKCS1-v1_5",
+            modulusLength: 2048,
+            publicExponent: new Uint8Array([1, 0, 1]),
+            hash: "SHA-256",
+        },
+        true,
+        ["sign", "verify"]
+    );
+}
+
+async function signData(privateKey, data) {
+    const encoded = new TextEncoder().encode(data);
+    return await window.crypto.subtle.sign({ name: "RSASSA-PKCS1-v1_5" }, privateKey, encoded);
+}
+
+async function exportPublicKey(key) {
+    const exported = await window.crypto.subtle.exportKey("spki", key);
+    return btoa(String.fromCharCode(...new Uint8Array(exported)));
+}
+</script>
+
+
+    
+
+
+</body>
+</html>

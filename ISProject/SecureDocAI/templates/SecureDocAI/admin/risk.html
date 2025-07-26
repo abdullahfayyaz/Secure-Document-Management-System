@@ -1,0 +1,160 @@
+{% extends "SecureDocAI/admin/layout.html" %}
+{% load static %}  <!-- Make sure this is at the top -->
+
+{% block title %}Risk-Check - SecureDocAI{% endblock %}
+
+{% block content %}
+<style>
+    
+a {
+    text-decoration: none;
+}
+p.no-documents {
+    padding: 1rem;
+    margin-top: 2rem;
+    background-color: #fef3c7; /* light yellow */
+    color: #92400e;             /* dark amber text */
+    border: 1px solid #fde68a;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+
+.table-no-logs {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    background-color: #f9f9f9;
+}
+
+
+</style>
+
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h1>SecureDocAI</h1>
+        <p>Admin Dashboard</p>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'admin_dashboard' %}" class="nav-item " data-tab="dashboard">
+            <i data-lucide="bar-chart-3"></i>
+            Dashboard
+        </a>
+        <a href="{% url 'admin_Requests' %}" class="nav-item "  data-tab="requests">
+            <i data-lucide="clock"></i>
+            Document Requests
+        </a>
+        <a href="{% url 'admin_Doc' %}" class="nav-item" data-tab="documents">
+            <i data-lucide="file-text"></i>
+            All Documents
+        </a>
+        <a href="{%  url 'admin_users' %}" class="nav-item" data-tab="users">
+            <i data-lucide="users"></i>
+            User Management
+        </a>
+        <a href="{% url 'admin_accesslog' %}" class="nav-item " data-tab="settings">
+            <i data-lucide="history"></i>
+            Access log
+        </a>
+        <a href="{% url 'admin_risk' %}" class="nav-item active" data-tab="settings">
+            <i data-lucide="alert-triangle	"></i>
+            Risk Check
+        </a>
+    </nav>
+    <a href="{% url 'logout' %}" class="logout-btn">
+        <i data-lucide="log-out"></i>
+        Logout
+    </a>
+</div>
+
+
+<main class="main-content">
+    <section>
+        <h2>Access log</h2>
+       
+        <div class="card">
+            <div class="table-header">
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" placeholder="Search risk logs..." />
+                </div>
+                <button class="filter-btn">
+                    <i data-lucide="filter"></i> Filter
+                </button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Description</th>
+                        <th>Risk Level</th>
+                        <th>Timestamp</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody  id="riskLogTable">
+                    {% for log in risk_logs %}
+                    <tr>
+                        <td>{{ log.user.username }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.description }}</td>
+                        <td>
+                            <span class="risk risk-{{ log.risk_level|lower }}">
+                                {{ log.risk_level|title }}
+                            </span>
+                        </td>
+                        <td>{{ log.timestamp|date:"Y-m-d H:i" }}</td>
+                        <td>{{ log.ip_address|default:"N/A" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="table-no-logs">No risk logs found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        
+
+
+
+    </section>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchInput");
+        const tableRows = document.querySelectorAll("#riskLogTable tr");
+
+        searchInput.addEventListener("keyup", function () {
+            const filter = searchInput.value.toLowerCase();
+
+            tableRows.forEach(function (row) {
+                const rowText = row.textContent.toLowerCase();
+                if (rowText.includes(filter)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Optionally show "no results" message
+            const anyVisible = Array.from(tableRows).some(row => row.style.display !== "none");
+            const noLogsRow = document.querySelector(".table-no-logs");
+            if (noLogsRow) {
+                noLogsRow.style.display = anyVisible ? "none" : "";
+            }
+        });
+    });
+</script>
+
+
+
+<script>lucide.createIcons();</script>
+
+{% endblock %}

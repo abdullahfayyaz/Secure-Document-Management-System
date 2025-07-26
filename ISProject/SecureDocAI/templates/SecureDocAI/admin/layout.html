@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SecureDocAI - Admin Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'styles/admin.css' %}">
+    <script src="https://unpkg.com/lucide@latest"></script> 
+    <style>
+        .toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.toast {
+  min-width: 250px;
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  animation: slideIn 0.4s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.toast.success {
+  background-color: #38a169; /* green */
+}
+
+.toast.error {
+  background-color: #e53e3e; /* red */
+}
+
+.toast.warning {
+  background-color: #dd6b20; /* orange */
+}
+
+.toast.info {
+  background-color: #3182ce; /* blue */
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+
+
+    {% block content %}
+    <!-- Page-specific content will be injected here -->
+    {% endblock %}
+    </div>
+    <div class="toast-container">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="toast {{ message.tags }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+{% extends "SecureDocAI/reviewer/layout.html" %}
+{% load static %}  <!-- Make sure this is at the top -->
+
+{% block title %}SecureDocAI - All Doc{% endblock %}
+
+{% block content %}
+
+<style>
+    .btn-link {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 10px;
+    color: white;
+    background-color: #6277b8;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-link:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+.btn-link:active {
+    transform: scale(0.98);
+}
+
+.btn-link.disabled {
+    pointer-events: none;
+    background-color: #aaa;
+    cursor: default;
+}
+
+
+a {
+    text-decoration: none;
+}
+</style>
+<nav class="main-nav">
+    <div class="container">
+        <div class="nav-links">
+            <a href="{% url 'reviewer_dashboard' %}" class="nav-link active">All Documents</a>
+            <a href="{% url 'reviewer_dashboard_myDoc' %}" class="nav-link">My Documents</a>
+            <a href="{% url 'reviewer_dashboard_Request' %}" class="nav-link">Request Status</a>
+            <a href="{% url 'reviewer_accesslog' %}" class="nav-link">Access log</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container">
+    <section class="page active">
+        <h1>All Documents</h1>
+        <div class="documents-grid">
+        {% for doc in documents %}
+        <div class="document-card">
+            <div class="document-header">
+                <div class="document-info">
+                    <div class="document-title">
+                        <i data-lucide="file-text"></i>
+                        <span>{{ doc.title }}</span>
+                    </div>
+                    <p class="document-description">{{ doc.description|default:"No description available" }}</p>
+                    <div class="document-metadata">
+                        <div class="metadata-item">
+                            <i data-lucide="user"></i>
+                            <span>{{ doc.uploader.username }}</span>
+                        </div>
+                        <div class="metadata-item">
+                            <i data-lucide="clock"></i>
+                            <span>{{ doc.uploaded_at|date:"Y-m-d" }}</span>
+                        </div>
+                    </div>
+                </div>
+        
+                {% with doc.reviewrequest_set.all|dictsort:"requested_at" as requests %}
+                    {% with False as requested %}
+                        {% for req in requests %}
+                            {% if req.reviewer == request.user %}
+                                <a class="btn-link disabled">Request Pending</a>
+                                {% with True as requested %}{% endwith %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if not requested %}
+                            <a href="{% url 'request_access' doc.id %}" class="btn-link">Request Access</a>
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
+            </div>
+        </div>
+        {% endfor %}
+        
+    </div>
+        
+        
+    </section>
+</main>
+<script>lucide.createIcons();</script>
+{% endblock %}

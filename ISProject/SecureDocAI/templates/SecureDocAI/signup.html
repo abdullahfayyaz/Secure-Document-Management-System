@@ -1,0 +1,62 @@
+{% extends "SecureDocAI/layout.html" %}
+{% load static %}  <!-- Make sure this is at the top -->
+
+{% block title %}SecureDocAI - Sign Up{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="form-container" id="signupForm">
+        <h1>SecureDocAI</h1>
+        <h2>Sign Up</h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" id="newUsername" name="username" required placeholder="Username">
+            </div>
+            <div class="form-group">
+                <input type="email" id="email" name="email" required placeholder="Email">
+            </div>
+            <div class="form-group">
+                <select id="role" name="role" required class="role-select">
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="reviewer">Reviewer</option>
+                    <option value="uploader">Uploader</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="password" id="newPassword" name="password" required placeholder="Password">
+            </div>
+            <div class="form-group">
+                <input type="password" id="confirmPassword" name="confirm_password" required placeholder="Confirm Password">
+            </div>
+            
+            <!-- Display error message if any -->
+            {% if error %}
+                <p style="color: red;">{{ error }}</p>
+            {% endif %}
+            
+            <button type="submit" class="btn">Sign Up</button>
+        </form>
+        
+        
+        
+        <p>Already have an account? <a href="{% url 'home' %}">Login</a></p>
+    </div>
+</div>
+
+<div class="loader hidden" id="loader">
+    <div class="spinner"></div>
+</div>
+
+<script>
+    window.onload = function() {
+    // Clear the error message when the page is loaded
+    const errorElement = document.getElementById('passwordError');
+    if (errorElement) {
+        errorElement.textContent = '';
+    }
+}
+</script>
+{% endblock %}
