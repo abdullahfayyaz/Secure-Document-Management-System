@@ -20,5 +20,13 @@
 - **Version Control**: Git, GitHub
 
 
+## 🧪 How to Run Locally
+
+git clone https://github.com/yourusername/SecureDocAI.git
+cd ISProject
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+
 
 
